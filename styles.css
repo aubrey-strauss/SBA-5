@@ -1,4 +1,3 @@
-
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -16,11 +15,6 @@ body {
 
 h1 {
     text-align: center;
-    margin-bottom: 25px;
-}
-
-h2 {
-    margin-top: 30px;
 }
 
 #taskForm {
@@ -34,24 +28,27 @@ label {
 }
 
 input,
-select {
+textarea {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-#addTaskButton {
+textarea {
+    min-height: 150px;
+}
+
+#submitButton {
     padding: 10px;
     margin-top: 10px;
     font-size: 16px;
 }
 
-#filters {
-    margin-top: 25px;
-    padding: 15px;
-    background-color: #f4f4f4;
-    border-radius: 5px;
+#titleError,
+#contentError {
+    color: red;
+    margin: 0;
 }
 
 #taskList {
@@ -60,20 +57,27 @@ select {
 }
 
 #taskList li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#taskList h3 {
+    margin-top: 0;
+}
+
+#taskList p {
+    white-space: pre-wrap;
+}
+
+#taskList small {
+    display: block;
     margin-bottom: 10px;
-
 }
 
-#taskList strong {
-    margin-right: auto;
-}
-
-.updateStatus {
-    width: auto;
-    padding: 6px;
-    font-size: 14px;
+.editButton,
+.deleteButton {
+    padding: 6px 10px;
+    margin-right: 5px;
 }

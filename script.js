@@ -1,300 +1,228 @@
-
-//1. Create the HTML Structure 
-//1.1 
-//Create input fields for the task name, category, deadline, and an initial status (e.g., “In Progress”). 
+//1. Create the HTML Structure
+//1.1
+//Create input fields for the post title and post content.
+let taskForm = document.getElementById("taskForm");
 let taskName = document.getElementById("taskName");
-let taskCategory = document.getElementById("taskCategory");
-let taskDeadline = document.getElementById("taskDeadline");
-let taskStatus = document.getElementById("taskStatus");
+let taskContent = document.getElementById("taskContent");
+let titleError = document.getElementById("titleError");
+let contentError = document.getElementById("contentError");
 
+//1.2
+//Include a “Submit Post” button that will add the post to the post list.
 
-//1.2 
-//Include an “Add Task” button that will add the task to the task list. 
-let addTaskButton = document.getElementById("addTaskButton");
+let submitButton = document.getElementById("submitButton");
 
-// Store all tasks in an array
-let tasks = [];
+// Store all posts in an array
+let posts = [];
 
+// Keep track of which post is being edited
+let editingPostId = null;
 
-// Load tasks from local storage
-let savedTasks = localStorage.getItem("tasks");
+// Load posts from local storage
+let savedPosts = localStorage.getItem("posts");
 
-if (savedTasks) {
-  tasks = JSON.parse(savedTasks);
+if (savedPosts) {
+    posts = JSON.parse(savedPosts);
 }
 
+// Display saved posts when the page loads
+displayPosts();
 
-addTaskButton.addEventListener("click", function () {
+// Handle form submission
+taskForm.addEventListener("submit", function (event) {
 
-  let taskText = taskName.value.trim();
+    // Prevent the page from refreshing
+    event.preventDefault();
 
-  if (taskText === "") {
-    alert("Please enter a task!");
-    return;
-  }
+    // Clear previous error messages
+    titleError.textContent = "";
+    contentError.textContent = "";
 
-  //1.3 
-  //Each task should be stored as an object with properties such as task name, category, deadline, and status. 
-  let newTask = {
-    name: taskName.value.trim(),
-    category: taskCategory.value.trim(),
-    deadline: taskDeadline.value,
-    status: taskStatus.value
-  };
+    let title = taskName.value.trim();
+    let content = taskContent.value.trim();
 
-  //1.4 
-  //Add the task object to an array that holds all tasks. 
-  tasks.push(newTask);
+    // Validate the title
+    if (title === "") {
+        titleError.textContent = "Please enter a post title.";
+        return;
+    }
 
-  keepTasks();
+    // Validate the content
+    if (content === "") {
+        contentError.textContent = "Please enter some post content.";
+        return;
+    }
 
-  displayTasks();
+    // Check if we are editing an existing post
+    if (editingPostId !== null) {
 
-  // Clear the input fields
-  taskName.value = "";
-  taskCategory.value = "";
-  taskDeadline.value = "";
-  taskStatus.value = "Not Started";
+        // Find the post being edited
+        let post = posts.find(function (post) {
+            return post.id === editingPostId;
+        });
+
+        // Update the post
+        post.title = title;
+        post.content = content;
+
+        // Stop editing
+        editingPostId = null;
+
+        // Change button text back
+        submitButton.textContent = "Submit Post";
+
+    } else {
+
+        //1.3
+        //Each post should be stored as an object with properties
+        //such as title, content, ID, and timestamp.
+        let newPost = {
+            id: Date.now(),
+            title: title,
+            content: content,
+            timestamp: new Date().toLocaleString()
+        };
+
+        //1.4
+        //Add the post object to an array that holds all posts.
+        posts.push(newPost);
+    }
+
+    // Save posts
+    keepPosts();
+
+    // Display posts
+    displayPosts();
+
+    // Clear the input fields
+    taskName.value = "";
+    taskContent.value = "";
 });
 
-//2.1 
-//Create an HTML structure (such as an unordered list or table) to display the task list. 
+//2.1
+//Create an HTML structure (such as an unordered list or table)
+//to display the post list.
 let taskList = document.getElementById("taskList");
 
-//2.2 
-//For each task, display the task name, category, deadline, and status. 
+//2.2
+//For each post, display the post title and content.
 
+//2.3
+//Dynamically update the post list in the browser each time
+//a new post is added, edited, or deleted.
 
-//2.3 
-//Dynamically update the task list in the browser each time a new task is added or a status is updated. 
-function displayTasks() {
+function displayPosts() {
 
-  // Clear the current task list
-  taskList.innerHTML = "";
+    // Clear the current post list
+    taskList.innerHTML = "";
 
-  // Check each task for overdue status
-  tasks.forEach(function (task) {
-    checkOverdue(task);
-  });
+    // Display each post
+    posts.forEach(function (post) {
 
-  // Display each task
-  tasks.forEach(function (task, index) {
+        // Create a list item
+        let listItem = document.createElement("li");
 
-    // Create a list item
-    let listItem = document.createElement("li");
+        // Display post title
+        let postTitle = document.createElement("h3");
+        postTitle.textContent = post.title;
 
-    // Display task name
-    let taskTitle = document.createElement("strong");
-    taskTitle.textContent = task.name;
+        // Display post content
+        let postContent = document.createElement("p");
+        postContent.textContent = post.content;
 
-    // Display category
-    let categoryText = document.createElement("span");
-    categoryText.textContent =
-      " | Category: " + (task.category || "None");
+        // Display timestamp
+        let postTime = document.createElement("small");
+        postTime.textContent = "Posted: " + post.timestamp;
 
-    // Display deadline
-    let deadlineText = document.createElement("span");
-    deadlineText.textContent =
-      " | Deadline: " + (task.deadline || "None");
+        // Create Edit button
+        let editButton = document.createElement("button");
 
-    // Create status dropdown
-    let statusSelect = document.createElement("select");
-    statusSelect.classList.add("updateStatus");
-    statusSelect.dataset.index = index;
+        editButton.textContent = "Edit";
+        editButton.classList.add("editButton");
+        editButton.dataset.id = post.id;
 
-    // Status options
-    let statuses = [
-      "Not Started",
-      "In Progress",
-      "Completed",
-      "Overdue"
-    ];
+        // Create Delete button
+        let deleteButton = document.createElement("button");
 
-    statuses.forEach(function (status) {
+        deleteButton.textContent = "Delete";
+        deleteButton.classList.add("deleteButton");
+        deleteButton.dataset.id = post.id;
 
-      let option = document.createElement("option");
+        // Add post information to the list item
+        listItem.appendChild(postTitle);
+        listItem.appendChild(postContent);
+        listItem.appendChild(postTime);
+        listItem.appendChild(editButton);
+        listItem.appendChild(deleteButton);
 
-      option.value = status;
-      option.textContent = status;
-
-      if (status === task.status) {
-        option.selected = true;
-      }
-
-      statusSelect.appendChild(option);
+        // Add the list item to the post list
+        taskList.appendChild(listItem);
     });
-
-    // Add task information to the list item
-    listItem.appendChild(taskTitle);
-    listItem.appendChild(categoryText);
-    listItem.appendChild(deadlineText);
-    listItem.appendChild(statusSelect);
-
-
-    // Add the list item to the task list
-    taskList.appendChild(listItem);
-  });
-
-  // Save changes
-  keepTasks();
 }
 
-//A dropdown or buttons to filter tasks by status or category. 
-let filterStatus = document.getElementById("filterStatus");
+//3. Delete and Edit Posts
+//3.1
+//Use event delegation to handle Edit and Delete buttons.
+taskList.addEventListener("click", function (event) {
 
-//4.2 
-//Provide a dropdown or set of buttons for users to choose a filter. 
-filterStatus.addEventListener("change", function () {
+    // Get the post ID from the button
+    let postId = Number(event.target.dataset.id);
 
-  let filterValue = filterStatus.value;
-  displayFilteredTasks(filterValue);
+    //3.2
+    //Delete the selected post.
+    if (event.target.classList.contains("deleteButton")) {
+        // Remove the post from the array
+        posts = posts.filter(function (post) {
+            return post.id !== postId;
+        });
+
+        // Save the updated posts
+        keepPosts();
+
+        // Display the updated posts
+        displayPosts();
+    }
+
+    //3.3
+    //Edit the selected post.
+    if (event.target.classList.contains("editButton")) {
+        // Find the selected post
+        let post = posts.find(function (post) {
+            return post.id === postId;
+        });
+
+        // Put the post information into the form
+        taskName.value = post.title;
+        taskContent.value = post.content;
+
+        // Remember which post is being edited
+        editingPostId = postId;
+
+        // Change the button text
+        submitButton.textContent = "Update Post";
+
+        // Put the cursor in the title field
+        taskName.focus();
+    }
 });
 
-//3. Updating Task Status 
-//3.1 
-//Allow users to update the status of tasks (e.g., “In Progress,” “Completed”) via a dropdown or button./ 
-taskList.addEventListener("change", function (event) {
 
-  if (event.target.classList.contains("updateStatus")) {
-    let taskIndex = event.target.dataset.index;
-    tasks[taskIndex].status = event.target.value;
-    keepTasks();
-    displayFilteredTasks(filterStatus.value);
-  }
-});
+//4. Persisting Post Data with Local Storage
+//4.1
+//Use local storage to save the current state of the post list
+//so that posts are restored when the page is refreshed.
 
-//3.2 
-//Automatically check each task’s deadline and mark tasks as “Overdue” if the current date has passed the deadline. 
-function checkOverdue(task) {
-  if (!task.deadline) {
-    return;
-  }
-
-  let now = new Date();
-  let deadline = new Date(task.deadline);
-
-  if (task.status !== "Completed" && now > deadline) {
-    task.status = "Overdue";
-  }
+function keepPosts() {
+    localStorage.setItem("posts", JSON.stringify(posts));
 }
 
-//4. Filtering Tasks 
-//4.1 
-//Add functionality to filter tasks by category or status (e.g., show only “Completed” tasks or tasks under the “Work” category). 
-function filterTasks(filter) {
-  if (filter === "All") {
-    return tasks;
-  }
+//4.2
+//Ensure that post data (including title, content, ID,
+//and timestamp) is stored and retrieved correctly.
 
-  if (filter === "Overdue") {
-    return tasks.filter(function (task) {
-      return task.status === "Overdue";
-    });
-  }
-
-  return tasks.filter(function (task) {
-    return task.status === filter;
-  });
+function loadPosts() {
+    let savedPosts = localStorage.getItem("posts");
+    if (savedPosts) {
+        posts = JSON.parse(savedPosts);
+    }
 }
-
-//4.3 
-//When a filter is selected, only display the tasks that match the selected category or status. 
-function displayFilteredTasks(filter) {
-  taskList.innerHTML = "";
-
-  let filteredTasks = filterTasks(filter);
-
-  filteredTasks.forEach(function (task) {
-
-    let taskIndex = tasks.indexOf(task);
-    let listItem = document.createElement("li");
-    let taskTitle = document.createElement("strong");
-
-    taskTitle.textContent = task.name;
-
-    let categoryText = document.createElement("span");
-    categoryText.textContent =
-      " | Category: " + (task.category || "None");
-
-    let deadlineText = document.createElement("span");
-    deadlineText.textContent =
-      " | Deadline: " + (task.deadline || "None");
-
-    let statusSelect = document.createElement("select");
-    statusSelect.classList.add("updateStatus");
-    statusSelect.dataset.index = taskIndex;
-
-    let statuses = [
-      "Not Started",
-      "In Progress",
-      "Completed",
-      "Overdue"
-    ];
-
-    statuses.forEach(function (status) {
-
-      let option = document.createElement("option");
-      option.value = status;
-      option.textContent = status;
-
-      if (status === task.status) {
-        option.selected = true;
-      }
-
-      statusSelect.appendChild(option);
-    });
-
-    listItem.appendChild(taskTitle);
-    listItem.appendChild(categoryText);
-    listItem.appendChild(deadlineText);
-    listItem.appendChild(statusSelect);
-
-    taskList.appendChild(listItem);
-  });
-}
-
-//5.Persisting Task Data with Local Storage 
-//5.1 
-//Use local storage to save the current state of the task list so that tasks are restored when the page is refreshed. 
-function keepTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-//5.2 
-//Ensure that task data (including name, category, deadline, and status) is stored and retrieved correctly. 
-function loadTasks() {
-  let savedTasks = localStorage.getItem("tasks");
-  if (savedTasks) {
-    tasks = JSON.parse(savedTasks);
-  }
-}
-
-//Write the JavaScript Code
-
-//Use an array to store tasks, each represented by an object.
-
-// The tasks array is created above.
-
-
-//Write functions to add tasks, update task status, check overdue tasks, and filter tasks.
-
-// These functions are created above.
-
-
-//Use DOM manipulation to display the task list dynamically.
-
-// displayTasks() and displayFilteredTasks() handle this.
-
-
-//Implement local storage to persist task data.
-
-// keepTasks() and loadTasks() handle this.
-
-
-
-//Test Your Application
-
-//Add multiple tasks and ensure they are displayed correctly.
-
-//Test the “Update Status” functionality to ensure tasks can be marked as
-

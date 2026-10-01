@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Task Manager</title>
+    <title>Interactive Personal Blog Platform</title>
 
     <script src="script.js" defer></script>
     <link rel="stylesheet" href="styles.css">
@@ -15,77 +15,30 @@
 
     <main class="task-manager">
 
-        <h1>Task Manager</h1>
+        <h1>Interactive Personal Blog Platform</h1>
 
-        <!--Input fields for creating a new task-->
+        <!-- Input fields for creating a new post -->
         <section id="taskForm">
 
-            <label for="taskName">Task Name:</label>
-            <input
-                type="text"
-                id="taskName"
-                placeholder="Enter task name"
-            >
+            <label for="taskName">Post Title:</label>
+            <input type="text" id="taskName" placeholder="Enter post title">
+            <label for="taskContent">Post Content:</label>
+            <textarea id="taskContent" placeholder="Write your post here..."></textarea>
 
-            <label for="taskCategory">Category:</label>
-            <input
-                type="text"
-                id="taskCategory"
-                placeholder="Enter category"
-            >
+            <!-- Custom error messages -->
+            <p id="titleError"></p>
+            <p id="contentError"></p>
 
-            <label for="taskDeadline">Deadline:</label>
-            <input
-                type="date"
-                id="taskDeadline"
-            >
-
-            <label for="taskStatus">Status:</label>
-            <select id="taskStatus">
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-            </select>
-
-            <button id="addTaskButton">Add Task</button>
-
+            <button id="submitButton">Submit Post</button>
         </section>
 
-
-        <!--A dropdown or buttons to filter tasks by status or category.-->
-        <section id="filters">
-
-            <label for="filterStatus">Filter by status:</label>
-
-            <select id="filterStatus">
-                <option value="All">All</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-
-                <!--Add an overdue option-->
-                <option value="Overdue">Overdue</option>
-            </select>
-
-        </section>
-
-
-        <!--Create an HTML structure (such as an unordered list or table) to display the task list.-->
+        <!-- Display area for all blog posts -->
         <section id="taskSection">
-            <h2>Tasks</h2>
+            <h2>Posts</h2>
             <ul id="taskList"></ul>
         </section>
 
-
-        <!--Allow users to update the status of tasks (e.g., “In Progress,” “Completed”) via a dropdown or button.-->
-        <select class="updateStatus">
-            <option value="Not Started">Not Started</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-        </select>
-
-
-        <!--A display area to show the list of tasks, including options to update task status.-->
+        <!-- Display area for dynamically created posts -->
         <div id="taskDisplay"></div>
 
     </main>
@@ -93,4 +46,3 @@
 </body>
 
 </html>
-
